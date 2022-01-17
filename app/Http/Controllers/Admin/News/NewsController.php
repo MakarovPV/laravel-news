@@ -78,7 +78,7 @@ class NewsController extends BaseController
     }
 
     /**
-     * Удаление указанной новости.
+     * Удаление новости.
      *
      * @param  int  $id
      *

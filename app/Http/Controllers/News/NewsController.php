@@ -32,9 +32,9 @@ class NewsController extends Controller
      */
     public function index()
     {
-        
+
         $paginate = $this->newsPage->getNewsWithPaginate(5);
-        
+
         return view('laranews.news.index', compact('paginate'));
     }
 }

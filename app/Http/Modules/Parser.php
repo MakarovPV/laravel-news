@@ -1,12 +1,11 @@
-<?php 
+<?php
 
 namespace App\Http\Modules;
 
 use Symfony\Component\DomCrawler\Crawler;
-use Illuminate\Support\Facades\Storage;
 use App\Models\News;
 
-class Parser 
+class Parser
 {
 	/**
      * @var Symfony\Component\DomCrawler\Crawler
@@ -14,17 +13,18 @@ class Parser
 	private $crawler;
 
 	/**
-     * Получение содержимого страницы по указанному url.
-     *
-     * @param string $url
-     *
-     * @return object
+     * @var Symfony\Component\DomCrawler\Crawler
      */
-	public function parserInit($url)
+	private $data_from_user = [];
+
+	/**
+     * @var Symfony\Component\DomCrawler\Crawler
+     */
+	private $data_for_store = [];
+
+	public function setProperties($array)
 	{
-		$dom = file_get_contents($url);
-		$this->crawler = new Crawler($dom, $url);
-		return $this->crawler;
+		$this->data_from_user = $array;
 	}
 
 	/**
@@ -34,11 +34,25 @@ class Parser
      *
      * @return string
      */
-	public function search($path)
+	public function getLinksFromMainPage($url, $path)
 	{
-		$links = $this->crawler->filter($path)->each(function(Crawler $node){
-			return $this->requestPrepare($node->link()->getUri());
+		$links = $this->parserInitialization($url)->filter($path)->each(function(Crawler $node){
+			return $this->retrieveDataByUrl($node->link()->getUri());
 		});
+	}
+
+	/**
+     * Получение содержимого страницы по указанному url.
+     *
+     * @param string $url
+     *
+     * @return object
+     */
+	private function parserInitialization($url)
+	{
+		$dom = file_get_contents($url);
+		$this->crawler = new Crawler($dom, $url);
+		return $this->crawler;
 	}
 
 	/**
@@ -47,21 +61,43 @@ class Parser
      * @param string $link
      *
      */
-	public function requestPrepare($link)
+	private function retrieveDataByUrl($url)
 	{
-		$domChild = file_get_contents($link);	
-		$crawlerChild = new Crawler($domChild, $link);
+		$this->parserInitialization($url);
 
-		$arr = [
-			'title' => $crawlerChild->filter('div.post-title > h1')->text(),
-			'short_description' => $crawlerChild->filter('div.post-lead > p')->text(),
-			'full_description' => $crawlerChild->filter('div.body')->children('p')->each(function(Crawler $node){ 
-				return $node->text(); 
-			}),
-			'news_picture' => $crawlerChild->filter('div.post-image-inner > a > img.wp-post-image')->attr('src'),
-		];
+		foreach($this->data_from_user as $key => $value){
+			$function = $key . 'Retrieve';
+			$this->data_for_store[$key][] = $this->$function($value);
+		};
+	}
 
-		return $this->store($arr);
+	private function titleRetrieve($value)
+	{
+		return $this->crawler->filter($value)->text();
+	}
+
+	private function shortTextRetrieve($value)
+	{
+		return $this->crawler->filter($value)->text();
+	}
+
+	private function longTextRetrieve($value)
+	{
+		$full_description = '';
+		$array = $this->crawler->filter($value)->children('p')->each(function(Crawler $node){
+			return $node->text();
+		});
+
+		foreach($array as $text){
+			$full_description .= $text;
+		};
+
+		return $full_description;
+	}
+
+	private function imageRetrieve($value)
+	{
+		return $this->crawler->filter($value)->attr('src');
 	}
 
 	/**
@@ -70,19 +106,15 @@ class Parser
      * @param string $path
      *
      */
-	public function store($array)
+	public function store()
 	{
-		$full_description = '';
-
-		foreach($array['full_description'] as $text){
-			 $full_description .=  $text;
-		}
-		
-		$news = News::insertOrIgnore([
-            'title' => $array['title'],
-            'short_description' => $array['short_description'],
-            'full_description' => $full_description,
-            'news_picture' => $array['news_picture'],
-        ]);
+		for($i=0; $i<count($this->data_for_store['title']);$i++){
+			$news = News::insertOrIgnore([
+		        'title' => $this->data_for_store['title'][$i],
+		        'short_description' => $this->data_for_store['shortText'][$i],
+		        'full_description' => $this->data_for_store['longText'][$i],
+		        'news_picture' => $this->data_for_store['image'][$i],
+        	]);
+		};	
 	}
 }

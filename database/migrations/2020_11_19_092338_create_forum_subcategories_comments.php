@@ -20,7 +20,6 @@ class CreateForumSubcategoriesComments extends Migration
 
             $table->string('comment');
 
-
             $table->timestamps();
 
             $table->softDeletes();
