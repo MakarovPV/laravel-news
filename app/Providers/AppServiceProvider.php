@@ -6,7 +6,6 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use App\Models\User;
 use App\Observers\UserObserver;
-use App\Models\SiteLinks;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,6 +27,5 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         User::observe(UserObserver::class);
-        View::share("links", SiteLinks::all()); //Вывод списка ссылок в шапку сайта.
     }
 }

@@ -67,6 +67,7 @@ class newsLoading extends Command
             'image' => new ImageRetrieve('img'),
         ]);
         $parser->retrieveDataFromPage();
+
         $parser->store();
     }
 }

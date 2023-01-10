@@ -21,12 +21,11 @@ class CreateNewsCommentsTable extends Migration
             $table->string('comment');
 
             $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at');
+            $table->timestamp('updated_at')->default(DB::raw('NULL ON UPDATE CURRENT_TIMESTAMP'))->nullable();
 
             $table->softDeletes();
 
             $table->foreign('parent_news_id')->references('id')->on('news');
-            //category_id = id из таблицы blog_categories
             $table->foreign('user_id')->references('id')->on('users');
         });
     }

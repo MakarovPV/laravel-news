@@ -20,9 +20,9 @@ class CreateNewsTable extends Migration
             $table->text('short_description');
             $table->text('full_description');
             $table->string('news_picture');
-            
+
             $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at');
+            $table->timestamp('updated_at')->default(DB::raw('NULL ON UPDATE CURRENT_TIMESTAMP'))->nullable();
             $table->softDeletes();
         });
     }
