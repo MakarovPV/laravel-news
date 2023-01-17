@@ -30,4 +30,9 @@ class News extends Model
     {
         return $this->hasMany(NewsComments::class, 'parent_news_id', 'id');
     }
+
+    public function newsUrls()
+    {
+        return $this->hasOne(NewsUrls::class);
+    }
 }

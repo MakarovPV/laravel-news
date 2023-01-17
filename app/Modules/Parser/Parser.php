@@ -2,9 +2,10 @@
 
 namespace App\Modules\Parser;
 
-use Symfony\Component\DomCrawler\Crawler;
 use App\Models\News;
-
+use App\Models\NewsUrls;
+use Illuminate\Support\Facades\DB;
+use Symfony\Component\DomCrawler\Crawler;
 
 class Parser
 {
@@ -79,7 +80,6 @@ class Parser
                 $this->data_for_store[$key][] = $value->retrieve($this->crawler);
             };
         }
-        $this->links = [];
 	}
 
     /**
@@ -89,12 +89,31 @@ class Parser
 	public function store()
 	{
         for($i=0; $i<count($this->data_for_store['title']);$i++){
-            News::insertOrIgnore([
-                'title' => $this->data_for_store['title'][$i],
-                'short_description' => $this->data_for_store['shortText'][$i],
-                'full_description' => $this->data_for_store['longText'][$i],
-                'news_picture' => $this->data_for_store['image'][$i],
-            ]);
-		}
+            DB::beginTransaction();
+            try{
+                News::InsertOrIgnore([
+                    'title' => $this->data_for_store['title'][$i],
+                    'short_description' => $this->data_for_store['shortText'][$i],
+                    'full_description' => $this->data_for_store['longText'][$i],
+                    'news_picture' => $this->data_for_store['image'][$i],
+                ]);
+                $newsId = News::where('title', $this->data_for_store['title'][$i])->first();
+                $newsId->newsUrls()->insertOrIgnore([
+                    'news_id' => $newsId->id,
+                    'url' => $this->links[$i],
+                ]);
+            } catch (\Exception $e) {
+                DB::rollBack();
+            }
+            DB::commit();
+        }
+        $this->clear();
 	}
+
+    private function clear()
+    {
+        $this->links = [];
+        $this->data_from_user = [];
+        $this->data_for_store = [];
+    }
 }

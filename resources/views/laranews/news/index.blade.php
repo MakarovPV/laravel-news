@@ -5,20 +5,23 @@
 		<div class="row justify-content-center">
 			<div class="col-md-8">
 				@foreach($paginate as $item)
-					<div class="card m-3"> 
-						<div class="card-body"> 
+					<div class="card m-3">
+						<div class="card-body">
 							<div class="container-rem">
-								<div class="card-body"> 
-										<h2 class="font-weight-bold pb-3"> {{ $item->title}}</h2> 
+								<div class="card-body">
+										<h2 class="font-weight-bold pb-3"> {{ $item->title}}</h2>
 									<p>{{ $item->created_at}}</p>
 									<a href="{{ route('news.comments.index', $item->id) }}">
-										<img class="img-fluid rounded carousel-inner" src="{{ $item->news_picture}}"> 
+										<img class="img-fluid rounded carousel-inner" src="{{ $item->news_picture}}">
 									</a>
 									<h4 class="text-xs-left pt-4 pl-0 col-10"> {{ $item->short_description}} </h4>
-									<a href="{{ route('news.comments.index', $item->id) }}">
-										<h4>Читать далее</h4> 
+                                    <a class="float-right text-decoration-none text-secondary" href="{{ $item->newsUrls->url }}">
+                                        <h4>Читать в источнике</h4>
+                                    </a>
+									<a class="float-left text-decoration-none text-dark" href="{{ route('news.comments.index', $item->id) }}">
+										<h4>Читать далее</h4>
 									</a>
-								</div> 
+								</div>
 							</div>
 						</div>
 					</div>
@@ -26,8 +29,8 @@
 				@if($paginate->total() > $paginate->count())
 					<div class="row justify-content-center">
 						<div class="col-md-12">
-							<div class="card m-3 align-items-center"> 
-								<div class="card-body"> 
+							<div class="card m-3 align-items-center">
+								<div class="card-body">
 									{{ $paginate->onEachSide(3)->links('vendor.pagination.bootstrap-4') }}
 								</div>
 							</div>

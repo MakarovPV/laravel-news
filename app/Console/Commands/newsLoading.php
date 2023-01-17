@@ -49,6 +49,7 @@ class newsLoading extends Command
             'image' => new ImageRetrieve('img'),
         ]);
         $parser->retrieveDataFromPage();
+        $parser->store();
 
         $parser->getLinksFromMainPage('https://nplus1.ru/', 'div.border-gray-2 > div.flex-col > a');
         $parser->setProperties([
@@ -58,6 +59,7 @@ class newsLoading extends Command
             'image' => new ImageRetrieve('img'),
         ]);
         $parser->retrieveDataFromPage();
+        $parser->store();
 
         $parser->getLinksFromMainPage('https://lenta.ru/', 'a.card-mini');
         $parser->setProperties([
