@@ -8,7 +8,7 @@ use App\Modules\Parser\TextRetrieve;
 use Illuminate\Console\Command;
 use App\Modules\Parser\Parser;
 
-class newsLoading extends Command
+class NewsLoading extends Command
 {
     /**
      * The name and signature of the console command.
@@ -69,7 +69,6 @@ class newsLoading extends Command
             'image' => new ImageRetrieve('img'),
         ]);
         $parser->retrieveDataFromPage();
-
         $parser->store();
     }
 }

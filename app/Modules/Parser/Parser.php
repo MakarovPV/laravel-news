@@ -3,7 +3,6 @@
 namespace App\Modules\Parser;
 
 use App\Models\News;
-use App\Models\NewsUrls;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\DomCrawler\Crawler;
 
