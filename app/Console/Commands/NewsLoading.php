@@ -2,11 +2,13 @@
 
 namespace App\Console\Commands;
 
-use App\Modules\Parser\ImageRetrieve;
-use App\Modules\Parser\LongTextRetrieve;
-use App\Modules\Parser\TextRetrieve;
-use Illuminate\Console\Command;
+use App\Modules\Parser\DataRetrieve\ImageRetrieve;
+use App\Modules\Parser\DataRetrieve\LongTextRetrieve;
+use App\Modules\Parser\DataRetrieve\TextRetrieve;
 use App\Modules\Parser\Parser;
+use App\Modules\Parser\SelectorPresets\SelectorPresetNakedScience;
+use App\Modules\Parser\SelectorPresets\SelectorPresetNPlus;
+use Illuminate\Console\Command;
 
 class NewsLoading extends Command
 {
@@ -39,35 +41,15 @@ class NewsLoading extends Command
      * @param Parser $parser
      * @return void
      */
-    public function handle(Parser $parser)
+    public function handle(Parser $parser, SelectorPresetNakedScience $nakedScience, SelectorPresetNPlus $nPlus)
     {
-        $parser->getLinksFromMainPage('https://naked-science.ru/', 'h3 > a');
-        $parser->setProperties([
-            'title' => new TextRetrieve('h1'),
-            'shortText' => new TextRetrieve('div.post-lead > p'),
-            'longText' => new LongTextRetrieve('div.body > p'),
-            'image' => new ImageRetrieve('img'),
-        ]);
+        $parser->getLinksFromMainPage($nakedScience->getSiteUrl(), $nakedScience->getUrlSelector());
+        $parser->setProperties($nakedScience->getReceivedData());
         $parser->retrieveDataFromPage();
         $parser->store();
 
-        $parser->getLinksFromMainPage('https://nplus1.ru/', 'div.border-gray-2 > div.flex-col > a');
-        $parser->setProperties([
-            'title' => new TextRetrieve('h1'),
-            'shortText' => new TextRetrieve('div.n1_material > p'),
-            'longText' => new LongTextRetrieve('div.n1_material > p'),
-            'image' => new ImageRetrieve('img'),
-        ]);
-        $parser->retrieveDataFromPage();
-        $parser->store();
-
-        $parser->getLinksFromMainPage('https://lenta.ru/', 'a.card-mini');
-        $parser->setProperties([
-            'title' => new TextRetrieve('h1'),
-            'shortText' => new TextRetrieve('div.topic-body__title-yandex'),
-            'longText' => new LongTextRetrieve('p'),
-            'image' => new ImageRetrieve('img'),
-        ]);
+        $parser->getLinksFromMainPage($nPlus->getSiteUrl(), $nPlus->getUrlSelector());
+        $parser->setProperties($nPlus->getReceivedData());
         $parser->retrieveDataFromPage();
         $parser->store();
     }

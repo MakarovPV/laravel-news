@@ -13,7 +13,7 @@ composer install
 Далее необходимо переименовать .env.example в .env, создать соединение с БД по порту 8101 и выполнить следующие команды:
 
 ```
-docker exec -it news_app bash
+docker exec -it laranews_app bash
 php artisan key:generate
 php artisan migrate
 php artisan db:seed

@@ -11,25 +11,25 @@ class Parser
 	/**
      * @var Symfony\Component\DomCrawler\Crawler
      */
-	private $crawler;
+	private Crawler $crawler;
 
     /**
      * Данные, переданные юзером
      * @var array
      */
-	private $data_from_user = [];
+	private array $data_from_user = [];
 
     /**
      * Данные, полученные с пропаршенных страниц
      * @var array
      */
-	private $data_for_store = [];
+	private array $data_for_store = [];
 
     /**
      * Список ссылок, по которым будет осуществляться парсинг
      * @var array
      */
-    private $links = [];
+    private array $links = [];
 
     /**
      * Добавление в массив данных от пользователя, где ключ - имя столбца в таблице, а значение - объект класса DataRetrieve
@@ -76,7 +76,7 @@ class Parser
             $this->parserInitialization($link);
 
             foreach($this->data_from_user as $key => $value){
-                $this->data_for_store[$key][] = $value->retrieve($this->crawler);
+                $this->data_for_store[$key][] = $this->data_from_user[$key]->retrieve($this->crawler);
             };
         }
 	}
