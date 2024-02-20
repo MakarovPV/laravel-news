@@ -38,19 +38,13 @@ class NewsLoading extends Command
 
     /**
      * Настройки парсинга
+     *
      * @param Parser $parser
      * @return void
      */
     public function handle(Parser $parser, SelectorPresetNakedScience $nakedScience, SelectorPresetNPlus $nPlus)
     {
-        $parser->getLinksFromMainPage($nakedScience->getSiteUrl(), $nakedScience->getUrlSelector());
-        $parser->setProperties($nakedScience->getReceivedData());
-        $parser->retrieveDataFromPage();
-        $parser->store();
-
-        $parser->getLinksFromMainPage($nPlus->getSiteUrl(), $nPlus->getUrlSelector());
-        $parser->setProperties($nPlus->getReceivedData());
-        $parser->retrieveDataFromPage();
-        $parser->store();
+        $parser->setUrl($nakedScience)->run();
+        $parser->setUrl($nPlus)->run();
     }
 }

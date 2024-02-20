@@ -3,63 +3,97 @@
 namespace App\Modules\Parser;
 
 use App\Models\News;
+use App\Modules\Parser\SelectorPresets\SelectorPresetForDataRetrieve;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\DomCrawler\Crawler;
 
 class Parser
 {
+    /**
+     * Объект класса сайта, по которому будет осуществляться поиск.
+     *
+     * @var SelectorPresetForDataRetrieve
+     */
+    private SelectorPresetForDataRetrieve $siteObject;
+
 	/**
      * @var Symfony\Component\DomCrawler\Crawler
      */
 	private Crawler $crawler;
 
     /**
-     * Данные, переданные юзером
+     * Данные, переданные пользователем.
+     *
      * @var array
      */
 	private array $data_from_user = [];
 
     /**
-     * Данные, полученные с пропаршенных страниц
+     * Данные, полученные с пропаршенных страниц.
+     *
      * @var array
      */
 	private array $data_for_store = [];
 
     /**
-     * Список ссылок, по которым будет осуществляться парсинг
+     * Список ссылок, по которым будет осуществляться парсинг.
+     *
      * @var array
      */
     private array $links = [];
 
     /**
-     * Добавление в массив данных от пользователя, где ключ - имя столбца в таблице, а значение - объект класса DataRetrieve
+     * @param SelectorPresetForDataRetrieve $siteObject
+     * @return $this
+     */
+    public function setUrl(SelectorPresetForDataRetrieve $siteObject)
+    {
+        $this->siteObject = $siteObject;
+        return $this;
+    }
+
+    /**
+     * @return void
+     */
+    public function run(): void
+    {
+        $this->getLinksFromMainPage();
+        $this->setProperties();
+        $this->retrieveDataFromPage();
+        $this->store();
+    }
+
+    /**
+     * Добавление в массив данных от пользователя, где ключ - имя столбца в таблице, а значение - объект класса DataRetrieve.
+     *
      * @param $array
      * @return void
      */
-	public function setProperties($array)
+	private function setProperties(): void
 	{
-		$this->data_from_user = $array;
+		$this->data_from_user = $this->siteObject->getReceivedData();
 	}
 
     /**
-     * Получение списка ссылок с основной страницы, соответствующих переданным параметрам
-     * @param string $url
-     * @param string $path
+     * Получение списка ссылок с основной страницы, соответствующих переданным параметрам.
+     *
+     * @param SelectorPresetForDataRetrieve $siteObject
      * @return void
      */
-	public function getLinksFromMainPage($url, $path)
+    private function getLinksFromMainPage(): void
 	{
-		$this->parserInitialization($url)->filter($path)->each(function(Crawler $node){
+		$this->parserInitialization($this->siteObject->getSiteUrl())->filter($this->siteObject->getUrlSelector())->each(function(Crawler $node){
 			$this->links[] = $node->link()->getUri();
 		});
 	}
 
     /**
-     * Получение содержимого страницы по указанному url
+     * Получение содержимого страницы по указанному url.
+     *
      * @param string $url
      * @return Symfony\Component\DomCrawler\Crawler|Crawler
      */
-	private function parserInitialization($url)
+	private function parserInitialization(string $url)
 	{
 		$dom = file_get_contents($url);
 		$this->crawler = new Crawler($dom, $url);
@@ -67,10 +101,11 @@ class Parser
 	}
 
     /**
-     * Добавление в массив data_for_store значений, полученных при переходе по ссылкам из массива links
+     * Добавление в массив data_for_store значений, полученных при переходе по ссылкам из массива links.
+     *
      * @return void
      */
-	public function retrieveDataFromPage()
+    private function retrieveDataFromPage(): void
 	{
         foreach($this->links as $link){
             $this->parserInitialization($link);
@@ -82,10 +117,11 @@ class Parser
 	}
 
     /**
-     * Добавление полученных данных в таблицу
+     * Добавление полученных данных в таблицу.
+     *
      * @return void
      */
-	public function store()
+    private function store(): void
 	{
         for($i=0; $i<count($this->data_for_store['title']);$i++){
             DB::beginTransaction();
@@ -109,7 +145,10 @@ class Parser
         $this->clear();
 	}
 
-    private function clear()
+    /**
+     * @return void
+     */
+    private function clear(): void
     {
         $this->links = [];
         $this->data_from_user = [];

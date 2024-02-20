@@ -8,6 +8,7 @@ abstract class DataRetrieve
 {
     /**
      * Искомый тег
+     *
      * @var string
      */
     protected string $searchValue;
@@ -22,8 +23,9 @@ abstract class DataRetrieve
 
     /**
      * Извлечение данных со страницы по переданному в конструктор тегу
+     *
      * @param Crawler $crawler
      * @return string
      */
-    abstract public function retrieve(Crawler $crawler) : string;
+    abstract public function retrieve(Crawler $crawler): string;
 }
